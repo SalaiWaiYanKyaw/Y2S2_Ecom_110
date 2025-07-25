@@ -1,6 +1,5 @@
 <?php
-$hash = password_hash("Abc!@#",PASSWORD_BCRYPT);
-echo $hash;
-echo "<br>hash length".strlen($hash);
-
+$password = "Asd!@#"; // change this to your real password
+$hash = password_hash($password, PASSWORD_DEFAULT);
+echo "Hashed password: " . $hash;
 ?>
