@@ -11,7 +11,8 @@ $dbname = "golden_city";
 
 try {
     // Connect using PDO
-    $pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+    $pdo = new PDO("mysql:host=localhost;port=3307;dbname=golden_city", $username, $password);
+
 
     // Optional: Set PDO to throw exceptions on error
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

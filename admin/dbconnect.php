@@ -5,7 +5,7 @@ $password = "";
 $dbname = "golden_city";
 
 // Corrected DSN
-$dsn = "mysql:host=$hostname;dbname=$dbname";
+$dsn = "mysql:host=$hostname;port=3307;dbname=$dbname";
 
 try {
     $conn = new PDO($dsn, $username, $password);
