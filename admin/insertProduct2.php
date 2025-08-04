@@ -1,5 +1,9 @@
 <?php
 require_once"dbconnect.php";
+if(!isset($_SESSION))
+{//session will be opened when it does not exist
+    session_start();
+}
 try
     {
         $sql = "select * from category";
@@ -13,6 +17,8 @@ try
     {
         echo $e->getMessage();
     }
+
+
 
 if(isset($_POST['insertBtn']))
 {
@@ -37,8 +43,29 @@ if(isset($_POST['insertBtn']))
 
     if ($status)
     {
-        echo "file uploaded";
-        echo "<img src=$filePath>";
+      try//inserting data into database
+      {
+        //productID	productName	category	price	description	qty	imgPath	
+        $sql = "insert into products values (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $flag = $stmt->execute([null,$name, $category, $price, $description, $qty, $filePath]);
+        $id = $conn->lastInsertId();
+        
+        if($flag)
+        {
+            $message = "New product with id $id has been inserted successfully!";
+            $_SESSION['message'] = $message;
+            header("Location: viewProduct.php");
+        }
+        else
+        {
+            echo "Fail";
+        }
+      }
+      catch(PDOException $e)
+      {
+        echo $e->getMessage();
+      }
     }
     else
     {
