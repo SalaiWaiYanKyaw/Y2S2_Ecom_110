@@ -4,17 +4,62 @@ if (!isset($_SESSION)) {
 }
 require_once "dbconnect.php";
 try {
+    $sql = "select * from category";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    //$stmt->fetch();
+    $categories = $stmt->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getMessage();
+}
+
+try {
     $sql = "SELECT p.productID, p.productName, 
 		p.price, p.description, p.qty,
         p.imgPath, c.catName as category
 
         from products p, category c where 
         p.category = c.catID";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $products = $stmt->fetchAll();
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    $products = $stmt->fetchAll();
 } catch (Exception $e) {
     echo $e->getMessage();
+}
+
+if (isset($_GET['bsearch'])) {
+    $text = $_GET['tsearch'];
+    try {
+        $sql =  "SELECT p.productID, p.productName, 
+		p.price, p.description, p.qty,
+        p.imgPath, c.catName as category
+
+        from products p, category c where 
+        p.category = c.catID and
+        p.productName like ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(["%" . $text . "%"]);
+        $products = $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+} //if end
+else if (isset($_GET['cSearch'])) {
+    $cid = $_GET['category'];//1, 2, 3, 4, 5
+       try {
+        $sql =  "SELECT p.productID, p.productName, 
+		p.price, p.description, p.qty,
+        p.imgPath, c.catName as category
+
+        from products p, category c where 
+        p.category = c.catID and
+        c.catID = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$cid]);
+        $products = $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
 }
 ?>
 
@@ -37,16 +82,34 @@ try {
         </div>
         <div class="row"><!-- content -->
             <div class="col-md-2 py-5 px-5">
-                <a href="insertProduct2.php" class="btn btn-outline-primary">New Product</a>
+                <div class="card">
+                    <a href="insertProduct2.php" class="btn btn-outline-primary">New Product</a>
+                </div>
+                <div class="card">
+                    <div class="card-title">
+                        Category Search
+                    </div>
+                    <div class="card-body">
+                        <form action="viewProduct.php" class="form" method="get">
+                            <select name="category" id="" class="form-select">
+                                <?php
+                                foreach ($categories as $category) {
+                                    echo "<option value=$category[catID]>$category[catName]</option>";
+                                }
+                                ?>
+                            </select>
+                            <button name="cSearch" class="btn btn-outline-primary rounded-pill" type="submit">Search
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
             <div class="col-md-10 py-5"><!-- table view -->
                 <?php
                 if (isset($_SESSION['message'])) {
                     echo "<p class = 'alert alert-success' style = width:420px> $_SESSION[message]</p>";
                     unset($_SESSION["message"]);
-                }
-                else if(isset($_SESSION['deleteSuccess'])) 
-                {
+                } else if (isset($_SESSION['deleteSuccess'])) {
                     echo "<p class = 'alert alert-success'>$_SESSION[deleteSuccess]</p>";
                     unset($_SESSION['deleteSuccess']);
                 }
@@ -64,10 +127,10 @@ try {
                         </tr>
                     </thead>
                     <tbody>
-                    <?php
-                    foreach($products as $product) 
-                    { $desc = substr($product['description'],0,50);
-                     echo"<tr>
+                        <?php
+                        foreach ($products as $product) {
+                            $desc = substr($product['description'], 0, 50);
+                            echo "<tr>
                           <td>$product[productName]</td>
                           <td>$product[category]</td>
                           <td>$product[price]</td>
@@ -77,12 +140,12 @@ try {
                           <td><a href=editDelete.php?eid=$product[productID] class ='btn btn-primary rounded pill'>Edit</a></td>
                           <td><a href=editDelete.php?did=$product[productID] class ='btn btn-danger rounded pill'>Delete</a></td>
                           </tr>";
-                    }
-                    ?>
+                        }
+                        ?>
                     </tbody>
                 </table>
             </div>
-            
+
         </div>
     </div>
 </body>
