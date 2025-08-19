@@ -45,8 +45,8 @@ if (isset($_GET['bsearch'])) {
     }
 } //if end
 else if (isset($_GET['cSearch'])) {
-    $cid = $_GET['category'];//1, 2, 3, 4, 5
-       try {
+    $cid = $_GET['category']; //1, 2, 3, 4, 5
+    try {
         $sql =  "SELECT p.productID, p.productName, 
 		p.price, p.description, p.qty,
         p.imgPath, c.catName as category
@@ -58,6 +58,36 @@ else if (isset($_GET['cSearch'])) {
         $stmt->execute([$cid]);
         $products = $stmt->fetchAll();
     } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
+else if(isset($_POST['radioBtn']))//for radio search
+{
+    $price = $_POST['price'];
+    if($price == "first")
+    {
+        $lower = 100;
+        $upper = 1000;
+    }
+    else if($price == "second")
+    {
+        $lower = 1000;
+        $upper = 2000;
+    }
+    try
+    {
+        $sql = "select p.productID, p.productName,
+                p.price, p.description,
+                p.qty, p.imgPath, c.catName as category
+                FROM products p, category c 
+                where p.price BETWEEN ? and ? AND
+                c.catID = p.category";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$lower, $upper]);
+        $products = $stmt->fetchAll();
+    }
+    catch(PDOException $e)
+    {
         echo $e->getMessage();
     }
 }
@@ -91,7 +121,7 @@ else if (isset($_GET['cSearch'])) {
                     </div>
                     <div class="card-body">
                         <form action="viewProduct.php" class="form" method="get">
-                            <select name="category" id="" class="form-select">
+                            <select name="category" id="" class="form-select mb-2">
                                 <?php
                                 foreach ($categories as $category) {
                                     echo "<option value=$category[catID]>$category[catName]</option>";
@@ -102,6 +132,21 @@ else if (isset($_GET['cSearch'])) {
                             </button>
                         </form>
                     </div>
+                </div>
+                <div class="card mb-3">
+                    <form action="viewProduct.php" class="form" name="" method="post">
+                        <div class="form-check">
+                            <input type="radio" name="price" value="first" class="form-check-input">
+                            <label for="" class="form-check-label">$100-$1000</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="radio" name="price" value="second" class="form-check-input">
+                            <label for="" class="form-check-label">$1000-2000</label>
+                        </div>
+                        <div class="mb-2">
+                            <button name="radioBtn"  class="btn btn-outline-primary rounded-pill">Search                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="col-md-10 py-5"><!-- table view -->
