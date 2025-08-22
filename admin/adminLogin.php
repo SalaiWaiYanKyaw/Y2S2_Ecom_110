@@ -20,7 +20,7 @@ if (isset($_POST['login'])) //$_POST is super global array
     {
       $_SESSION['loginSuccess'] = true;
       $_SESSION['email'] = $email;
-
+      header("Location:viewProduct.php");
 
     } else // not match
     {
